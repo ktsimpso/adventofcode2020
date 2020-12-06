@@ -1,7 +1,7 @@
 extern crate clap;
 mod report_repair;
 use anyhow::Error;
-use clap::{App, Arg, SubCommand};
+use clap::{App, AppSettings};
 use simple_error::SimpleError;
 
 const VERSION: &'static str = env!("CARGO_PKG_VERSION");
@@ -11,14 +11,8 @@ fn main() -> Result<(), Error> {
         .version(VERSION)
         .author("Kevin Simpson <ktsimpso@gmail.com>")
         .about("Run advent of code problems from this main program")
-        .subcommand(
-            SubCommand::with_name("report-repair")
-                .about(
-                    "Looks through the input for two numbers that sum to 2020. \
-             Then multiplies the result and produces the output.",
-                )
-                .version("1.0.0"),
-        )
+        .setting(AppSettings::SubcommandRequiredElseHelp)
+        .subcommand(report_repair::sub_command())
         .get_matches();
 
     matches
