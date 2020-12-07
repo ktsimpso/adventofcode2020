@@ -1,4 +1,5 @@
 use anyhow::Error;
+use nom::{character::complete::digit1, combinator::map_res, IResult};
 use std::fs::File;
 use std::io::{BufRead, BufReader};
 
@@ -30,4 +31,12 @@ where
                 parsed_lines
             })
         })
+}
+
+pub fn parse_usize(input: &str) -> IResult<&str, usize> {
+    map_res(digit1, usisze_from_string)(input)
+}
+
+fn usisze_from_string(input: &str) -> Result<usize, Error> {
+    usize::from_str_radix(input, 10).map_err(|err| err.into())
 }

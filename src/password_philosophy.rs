@@ -1,10 +1,12 @@
-use crate::lib::{file_to_lines, parse_lines};
+use crate::lib::{file_to_lines, parse_lines, parse_usize};
 use anyhow::Error;
 use clap::{value_t_or_exit, App, AppSettings, Arg, ArgMatches, SubCommand};
-use nom::bytes::complete::{tag, take, take_while1};
-use nom::character::complete;
-use nom::combinator::{map_parser, map_res};
-use nom::sequence::{preceded, tuple};
+use nom::{
+    bytes::complete::{tag, take, take_while1},
+    character::complete,
+    combinator::map_parser,
+    sequence::{preceded, tuple},
+};
 use simple_error::SimpleError;
 use strum::VariantNames;
 use strum_macros::{EnumString, EnumVariantNames};
@@ -150,12 +152,4 @@ fn parse_password_line(line: &String) -> Result<PasswordLine, Error> {
         password: password.to_string(),
     })
     .map_err(|_| SimpleError::new("Parse failure").into())
-}
-
-fn parse_usize(input: &str) -> nom::IResult<&str, usize> {
-    map_res(complete::digit1, usisze_from_string)(input)
-}
-
-fn usisze_from_string(input: &str) -> Result<usize, Error> {
-    usize::from_str_radix(input, 10).map_err(|err| err.into())
 }
