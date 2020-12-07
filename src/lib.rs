@@ -1,7 +1,42 @@
+#![feature(const_fn_fn_ptr_basics)]
+
 use anyhow::Error;
+use clap::{App, ArgMatches};
 use nom::{character::complete::digit1, combinator::map_res, IResult};
 use std::fs::File;
 use std::io::{BufRead, BufReader};
+
+pub struct Command<'a> {
+    sub_command: fn() -> App<'static, 'static>,
+    name: &'a str,
+    run: fn(&ArgMatches) -> Result<(), Error>,
+}
+
+impl Command<'_> {
+    pub const fn new<'a>(
+        sub_command: fn() -> App<'static, 'static>,
+        name: &'a str,
+        run: fn(&ArgMatches) -> Result<(), Error>,
+    ) -> Command<'a> {
+        Command {
+            sub_command: sub_command,
+            name: name,
+            run: run,
+        }
+    }
+
+    pub fn sub_command(&self) -> App<'static, 'static> {
+        (self.sub_command)()
+    }
+
+    pub fn name(&self) -> &str {
+        self.name
+    }
+
+    pub fn run(&self, arguments: &ArgMatches) -> Result<(), Error> {
+        (self.run)(arguments)
+    }
+}
 
 pub fn file_to_lines(file_name: &String) -> Result<Vec<String>, Error> {
     File::open(file_name)

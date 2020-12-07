@@ -1,8 +1,10 @@
-use crate::lib::{file_to_lines, parse_lines};
+use crate::lib::{file_to_lines, parse_lines, Command};
 use anyhow::Error;
 use clap::{value_t_or_exit, App, AppSettings, Arg, ArgMatches, SubCommand};
 use simple_error::SimpleError;
 use std::collections::HashMap;
+
+pub const REPORT_REPAIR: Command = Command::new(sub_command, "report-repair", run);
 
 struct ReportRepairArgs {
     file: String,
@@ -10,8 +12,8 @@ struct ReportRepairArgs {
     number: usize,
 }
 
-pub fn sub_command() -> App<'static, 'static> {
-    SubCommand::with_name("report-repair")
+fn sub_command() -> App<'static, 'static> {
+    SubCommand::with_name(REPORT_REPAIR.name())
         .about(
             "Looks through the input for n numbers that sum to target. \
 Then multiplies the result and produces the output.",
@@ -58,9 +60,7 @@ Then multiplies the result and produces the output.",
         )
 }
 
-pub fn run(arguments: &ArgMatches) -> Result<(), Error> {
-    println!("=============Running report repair=============");
-
+fn run(arguments: &ArgMatches) -> Result<(), Error> {
     let report_arguments = match arguments.subcommand_name() {
         Some("part1") => ReportRepairArgs {
             file: "day1/input.txt".to_string(),
@@ -136,12 +136,7 @@ fn find_sum(
             numbers
                 .get_key_value(&(target - value))
                 .filter(|(key, count)| key != &&value || count > &&1)
-                .map(|(key, _count)| {
-                    let mut result = Vec::new();
-                    result.push(**key);
-                    result.push(*value);
-                    result
-                })
+                .map(|(key, _count)| vec![**key, *value])
         })
         .ok_or(SimpleError::new(format!("No values found that sum to {}", target)).into())
 }

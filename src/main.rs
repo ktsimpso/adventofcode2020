@@ -1,28 +1,49 @@
+#![feature(const_fn_fn_ptr_basics)]
+
 mod lib;
 mod password_philosophy;
 mod report_repair;
 mod toboggan_trajectory;
+
 use anyhow::Error;
 use clap::{App, AppSettings};
+use lib::Command;
 use simple_error::SimpleError;
+use std::collections::HashMap;
 
 const VERSION: &'static str = env!("CARGO_PKG_VERSION");
+const COMMANDS: &'static [Command] = &[
+    toboggan_trajectory::TOBOGGAN_TRAJECTORY,
+    password_philosophy::PASSWORD_PHILOSOPHY,
+    report_repair::REPORT_REPAIR,
+];
 
 fn main() -> Result<(), Error> {
-    let matches = App::new("Advent of code 2020")
+    let app = App::new("Advent of code 2020")
         .version(VERSION)
         .author("Kevin Simpson <ktsimpso@gmail.com>")
         .about("Run advent of code problems from this main program")
-        .setting(AppSettings::SubcommandRequiredElseHelp)
-        .subcommand(report_repair::sub_command())
-        .subcommand(password_philosophy::sub_command())
-        .subcommand(toboggan_trajectory::sub_command())
+        .setting(AppSettings::SubcommandRequiredElseHelp);
+
+    let matches = COMMANDS
+        .iter()
+        .fold(app, |app, command| app.subcommand(command.sub_command()))
         .get_matches();
 
-    match matches.subcommand() {
-        ("report-repair", Some(args)) => report_repair::run(args),
-        ("password-philosophy", Some(args)) => password_philosophy::run(args),
-        ("toboggan-trajectory", Some(args)) => toboggan_trajectory::run(args),
-        _ => Err(SimpleError::new("No valid subcommand found").into()),
+    let sub_commands: HashMap<&str, &Command> = COMMANDS
+        .iter()
+        .map(|command| (command.name(), command))
+        .collect();
+
+    if let (command_name, Some(args)) = matches.subcommand() {
+        sub_commands
+            .get(command_name)
+            .ok_or_else::<Error, _>(|| SimpleError::new("No valid subcommand found").into())
+            .and_then(|command| {
+                println!("=============Running {:}=============", command.name());
+                command.run(args)
+            })
+    } else {
+        Err(SimpleError::new("No arguments found").into())
     }
 }

@@ -1,4 +1,4 @@
-use crate::lib::{file_to_lines, parse_lines, parse_usize};
+use crate::lib::{file_to_lines, parse_lines, parse_usize, Command};
 use anyhow::Error;
 use clap::{value_t_or_exit, values_t_or_exit, App, AppSettings, Arg, ArgMatches, SubCommand};
 use nom::{
@@ -10,6 +10,8 @@ use nom::{
 };
 use simple_error::SimpleError;
 use std::str::FromStr;
+
+pub const TOBOGGAN_TRAJECTORY: Command = Command::new(sub_command, "toboggan-trajectory", run);
 
 struct TobogganTrajectoryArgs {
     file: String,
@@ -40,8 +42,8 @@ enum Terrain {
     Tree,
 }
 
-pub fn sub_command() -> App<'static, 'static> {
-    SubCommand::with_name("toboggan-trajectory")
+fn sub_command() -> App<'static, 'static> {
+    SubCommand::with_name(TOBOGGAN_TRAJECTORY.name())
         .about(
             "Takes a toboggan hill and a slope an returns the product of the number of trees \
             that the toboggan hit on each slope",
@@ -82,29 +84,21 @@ pub fn sub_command() -> App<'static, 'static> {
         )
 }
 
-pub fn run(arguments: &ArgMatches) -> Result<(), Error> {
-    println!("=============Running toboggan trajectory=============");
-
+fn run(arguments: &ArgMatches) -> Result<(), Error> {
     let tobaggan_tarjectory_arguments = match arguments.subcommand_name() {
         Some("part1") => TobogganTrajectoryArgs {
             file: "day3/input.txt".to_string(),
-            slopes: {
-                let mut slopes = Vec::new();
-                slopes.push(Slope { right: 3, down: 1 });
-                slopes
-            },
+            slopes: vec![Slope { right: 3, down: 1 }],
         },
         Some("part2") => TobogganTrajectoryArgs {
             file: "day3/input.txt".to_string(),
-            slopes: {
-                let mut slopes = Vec::new();
-                slopes.push(Slope { right: 1, down: 1 });
-                slopes.push(Slope { right: 3, down: 1 });
-                slopes.push(Slope { right: 5, down: 1 });
-                slopes.push(Slope { right: 7, down: 1 });
-                slopes.push(Slope { right: 1, down: 2 });
-                slopes
-            },
+            slopes: vec![
+                Slope { right: 1, down: 1 },
+                Slope { right: 3, down: 1 },
+                Slope { right: 5, down: 1 },
+                Slope { right: 7, down: 1 },
+                Slope { right: 1, down: 2 },
+            ],
         },
         _ => TobogganTrajectoryArgs {
             file: value_t_or_exit!(arguments.value_of("file"), String),

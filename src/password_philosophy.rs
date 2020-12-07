@@ -1,4 +1,4 @@
-use crate::lib::{file_to_lines, parse_lines, parse_usize};
+use crate::lib::{file_to_lines, parse_lines, parse_usize, Command};
 use anyhow::Error;
 use clap::{value_t_or_exit, App, AppSettings, Arg, ArgMatches, SubCommand};
 use nom::{
@@ -10,6 +10,8 @@ use nom::{
 use simple_error::SimpleError;
 use strum::VariantNames;
 use strum_macros::{EnumString, EnumVariantNames};
+
+pub const PASSWORD_PHILOSOPHY: Command = Command::new(sub_command, "password-philosophy", run);
 
 struct PasswordPhilosophyArgs {
     file: String,
@@ -31,8 +33,8 @@ enum PasswordPolicy {
     RequiredPositions,
 }
 
-pub fn sub_command() -> App<'static, 'static> {
-    SubCommand::with_name("password-philosophy")
+fn sub_command() -> App<'static, 'static> {
+    SubCommand::with_name(PASSWORD_PHILOSOPHY.name())
         .about(
             "Takes a list of password key/password pairs and returns the number of valid passwords.",
         )
@@ -75,9 +77,7 @@ pub fn sub_command() -> App<'static, 'static> {
         )
 }
 
-pub fn run(arguments: &ArgMatches) -> Result<(), Error> {
-    println!("=============Running password philosophy=============");
-
+fn run(arguments: &ArgMatches) -> Result<(), Error> {
     let password_philosophy_arguments = match arguments.subcommand_name() {
         Some("part1") => PasswordPhilosophyArgs {
             file: "day2/input.txt".to_string(),
