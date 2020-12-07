@@ -6,17 +6,27 @@ use nom::character::complete;
 use nom::combinator::{map_parser, map_res};
 use nom::sequence::{preceded, tuple};
 use simple_error::SimpleError;
+use strum::VariantNames;
+use strum_macros::{EnumString, EnumVariantNames};
 
 struct PasswordPhilosophyArgs {
     file: String,
+    password_policy: PasswordPolicy,
 }
 
 #[derive(Debug)]
 struct PasswordLine {
-    min: usize,
-    max: usize,
+    first: usize,
+    second: usize,
     character: char,
     password: String,
+}
+
+#[derive(Debug, EnumString, EnumVariantNames)]
+#[strum(serialize_all = "kebab_case")]
+enum PasswordPolicy {
+    RequiredCount,
+    RequiredPositions,
 }
 
 pub fn sub_command() -> App<'static, 'static> {
@@ -31,14 +41,33 @@ pub fn sub_command() -> App<'static, 'static> {
             Arg::with_name("file")
                 .short("f")
                 .help("Path to the input file. Input should be newline delimited and each line \
-                should have the form: {min_number_of_characters}-{max_number_of_characters} {charactert}: {password}")
+                should have the form: {unsigned int}-{unsigned int} {character}: {password}")
                 .takes_value(true)
+                .required(true),
+        )
+        .arg(
+            Arg::with_name("policy")
+                .short("p")
+                .help("Password policy to use to validate the password. Valid policies are as follows:\n\n\
+                required-count: The first {unsigned int} is the minimum number of {character} required in \
+                the password. While the second {unsigned int} is the maximum.\n\n\
+                required-positions: Each {unsigned int} is a 1 based index where exactly one of those indexes \
+                contains the {character}.")
+                .takes_value(true)
+                .possible_values(&PasswordPolicy::VARIANTS)
                 .required(true),
         )
         .subcommand(
             SubCommand::with_name("part1")
                 .about(
-                    "Validates the default input.",
+                    "Validates the default input with the required-count policy",
+                )
+                .version("1.0.0"),
+        )
+        .subcommand(
+            SubCommand::with_name("part2")
+                .about(
+                    "Validates the default input with the required-positions policy",
                 )
                 .version("1.0.0"),
         )
@@ -50,10 +79,21 @@ pub fn run(arguments: &ArgMatches) -> Result<(), Error> {
     let password_philosophy_arguments = match arguments.subcommand_name() {
         Some("part1") => PasswordPhilosophyArgs {
             file: "day2/input.txt".to_string(),
+            password_policy: PasswordPolicy::RequiredCount,
+        },
+        Some("part2") => PasswordPhilosophyArgs {
+            file: "day2/input.txt".to_string(),
+            password_policy: PasswordPolicy::RequiredPositions,
         },
         _ => PasswordPhilosophyArgs {
             file: value_t_or_exit!(arguments.value_of("file"), String),
+            password_policy: value_t_or_exit!(arguments.value_of("policy"), PasswordPolicy),
         },
+    };
+
+    let password_validator = match password_philosophy_arguments.password_policy {
+        PasswordPolicy::RequiredCount => is_min_max_char_password_valid,
+        PasswordPolicy::RequiredPositions => is_position_char_password_valid,
     };
 
     file_to_lines(&password_philosophy_arguments.file)
@@ -61,20 +101,36 @@ pub fn run(arguments: &ArgMatches) -> Result<(), Error> {
         .map(|password_lines| {
             password_lines
                 .into_iter()
-                .filter(|password_line| {
-                    let instances = password_line
-                        .password
-                        .chars()
-                        .filter(|character| character == &password_line.character)
-                        .count();
-                    instances >= password_line.min && instances <= password_line.max
-                })
+                .filter(password_validator)
                 .count()
         })
         .map(|result| {
             println!("{:#?}", result);
         })
         .map(|_| ())
+}
+
+fn is_min_max_char_password_valid(password_line: &PasswordLine) -> bool {
+    let instances = password_line
+        .password
+        .chars()
+        .filter(|character| character == &password_line.character)
+        .count();
+    instances >= password_line.first && instances <= password_line.second
+}
+
+fn is_position_char_password_valid(password_line: &PasswordLine) -> bool {
+    password_line
+        .password
+        .chars()
+        .enumerate()
+        .filter(|(index, character)| {
+            let one_index = index + 1;
+            (one_index == password_line.first || one_index == password_line.second)
+                && character == &password_line.character
+        })
+        .count()
+        == 1
 }
 
 fn parse_password_line(line: &String) -> Result<PasswordLine, Error> {
@@ -87,9 +143,9 @@ fn parse_password_line(line: &String) -> Result<PasswordLine, Error> {
         ),
         preceded(tag(": "), take_while1(|_| true)),
     ))(line)
-    .map(|(_, (min, max, character, password))| PasswordLine {
-        min: min,
-        max: max,
+    .map(|(_, (first, second, character, password))| PasswordLine {
+        first: first,
+        second: second,
         character: character,
         password: password.to_string(),
     })
