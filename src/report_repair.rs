@@ -1,10 +1,8 @@
-extern crate clap;
+use crate::lib::{file_to_lines, parse_lines};
 use anyhow::Error;
 use clap::{value_t_or_exit, App, AppSettings, Arg, ArgMatches, SubCommand};
 use simple_error::SimpleError;
 use std::collections::HashMap;
-use std::fs::File;
-use std::io::{BufRead, BufReader};
 
 struct ReportRepairArgs {
     file: String,
@@ -81,29 +79,9 @@ pub fn run(arguments: &ArgMatches) -> Result<(), Error> {
         },
     };
 
-    File::open(&report_arguments.file)
-        .map_err(|err| err.into())
-        .and_then(|file| {
-            BufReader::new(file)
-                .lines()
-                .try_fold(Vec::new(), |mut lines, line_result| {
-                    line_result.map(|line| {
-                        lines.push(line);
-                        lines
-                    })
-                })
-                .map_err(|err| err.into())
-        })
+    file_to_lines(&report_arguments.file)
         .and_then(|lines| {
-            lines
-                .into_iter()
-                .try_fold(Vec::new(), |mut lines, line| {
-                    line.parse::<isize>().map(|int_line| {
-                        lines.push(int_line);
-                        lines
-                    })
-                })
-                .map_err(|err| err.into())
+            parse_lines(lines, |line| line.parse::<isize>()).map_err(|err| err.into())
         })
         .and_then(|lines| {
             find_muliple_of_sum_of_n(&report_arguments.target, &lines, report_arguments.number)

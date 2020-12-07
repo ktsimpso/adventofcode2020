@@ -1,4 +1,5 @@
-extern crate clap;
+mod lib;
+mod password_philosophy;
 mod report_repair;
 use anyhow::Error;
 use clap::{App, AppSettings};
@@ -13,10 +14,12 @@ fn main() -> Result<(), Error> {
         .about("Run advent of code problems from this main program")
         .setting(AppSettings::SubcommandRequiredElseHelp)
         .subcommand(report_repair::sub_command())
+        .subcommand(password_philosophy::sub_command())
         .get_matches();
 
-    matches
-        .subcommand_matches("report-repair")
-        .ok_or(SimpleError::new("report-repair was not the sub command").into())
-        .and_then(report_repair::run)
+    match matches.subcommand() {
+        ("report-repair", Some(args)) => report_repair::run(args),
+        ("password-philosophy", Some(args)) => password_philosophy::run(args),
+        _ => Err(SimpleError::new("No valid subcommand found").into()),
+    }
 }

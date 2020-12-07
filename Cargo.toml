@@ -1,6 +1,6 @@
 [package]
 name = "adventofcode2020"
-version = "0.1.0"
+version = "0.2.0"
 authors = ["Kevin Simpson <ktsimpso@gmail.com>"]
 edition = "2018"
 
@@ -10,3 +10,4 @@ edition = "2018"
 clap = "2.33.3"
 anyhow = "1.0.34"
 simple-error = "0.2.2"
+nom = "6.0.1"
