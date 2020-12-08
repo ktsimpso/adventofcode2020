@@ -1,4 +1,5 @@
 #![feature(const_fn_fn_ptr_basics)]
+#![feature(iterator_fold_self)]
 
 mod binary_boarding;
 mod custom_customs;
