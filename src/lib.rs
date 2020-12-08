@@ -54,6 +54,16 @@ pub fn file_to_lines(file_name: &String) -> Result<Vec<String>, Error> {
         })
 }
 
+pub fn file_to_string(file_name: &String) -> Result<String, Error> {
+    file_to_lines(file_name).map(|lines| {
+        lines.into_iter().fold(String::new(), |mut acc, line| {
+            acc.push_str(&line.to_string());
+            acc.push('\n');
+            acc
+        })
+    })
+}
+
 pub fn parse_lines<T, U, E, F>(lines: Vec<T>, mut parse_function: F) -> Result<Vec<U>, E>
 where
     F: FnMut(&T) -> Result<U, E>,
@@ -62,6 +72,20 @@ where
         .into_iter()
         .try_fold(Vec::new(), |mut parsed_lines, line| {
             parse_function(&line).map(|parsed_line| {
+                parsed_lines.push(parsed_line);
+                parsed_lines
+            })
+        })
+}
+
+pub fn parse_lines_borrowed<T, U, E, F>(lines: Vec<T>, mut parse_function: F) -> Result<Vec<U>, E>
+where
+    F: FnMut(T) -> Result<U, E>,
+{
+    lines
+        .into_iter()
+        .try_fold(Vec::new(), |mut parsed_lines, line| {
+            parse_function(line).map(|parsed_line| {
                 parsed_lines.push(parsed_line);
                 parsed_lines
             })

@@ -1,6 +1,7 @@
 #![feature(const_fn_fn_ptr_basics)]
 
 mod lib;
+mod passport_processing;
 mod password_philosophy;
 mod report_repair;
 mod toboggan_trajectory;
@@ -16,6 +17,7 @@ const COMMANDS: &'static [Command] = &[
     toboggan_trajectory::TOBOGGAN_TRAJECTORY,
     password_philosophy::PASSWORD_PHILOSOPHY,
     report_repair::REPORT_REPAIR,
+    passport_processing::PASSPORT_PROCESSING,
 ];
 
 fn main() -> Result<(), Error> {

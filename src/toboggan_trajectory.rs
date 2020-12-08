@@ -65,7 +65,7 @@ fn sub_command() -> App<'static, 'static> {
             .short("s")
             .help(
                     "Slope of the toboggan specified by number of right units then number of down units \
-                separated by a comma. Exmaple: 3,1",
+                separated by a comma. Example: 3,1",
                 )
                 .takes_value(true)
                 .multiple(true)
