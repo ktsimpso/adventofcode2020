@@ -10,12 +10,22 @@ use nom::{
     sequence::tuple,
 };
 use simple_error::SimpleError;
+use strum::VariantNames;
+use strum_macros::{EnumString, EnumVariantNames};
 
 pub const BINARY_BOARDING: Command = Command::new(sub_command, "binary-boarding", run);
+
+#[derive(Debug, EnumString, EnumVariantNames)]
+#[strum(serialize_all = "kebab_case")]
+enum BoardingIdStategy {
+    HighestInList,
+    MissingFromList,
+}
 
 #[derive(Debug)]
 struct BinaryBoardingArgs {
     file: String,
+    strategy: BoardingIdStategy,
 }
 
 #[derive(Debug)]
@@ -43,9 +53,26 @@ fn sub_command() -> App<'static, 'static> {
                 .takes_value(true)
                 .required(true),
         )
+        .arg(
+            Arg::with_name("strategy")
+                .short("s")
+                .help(
+                    "What strategy to use when finding the boarding id.\n\n\
+                highest-in-list: Finds the highest boarding id in the list\n\
+                missing-from-list: searching for the missing boarding id or 0 if many missing ids\n",
+                )
+                .takes_value(true)
+                .possible_values(&BoardingIdStategy::VARIANTS)
+                .required(true),
+        )
         .subcommand(
             SubCommand::with_name("part1")
-                .about("Validates the default input but does not validate field values")
+                .about("Finds the highest boarding id from the default input")
+                .version("1.0.0"),
+        )
+        .subcommand(
+            SubCommand::with_name("part2")
+                .about("Finds the missing boarding id from the default input")
                 .version("1.0.0"),
         )
 }
@@ -54,9 +81,15 @@ fn run(arguments: &ArgMatches) -> Result<(), Error> {
     let binary_boarding_arguments = match arguments.subcommand_name() {
         Some("part1") => BinaryBoardingArgs {
             file: "day5/input.txt".to_string(),
+            strategy: BoardingIdStategy::HighestInList,
+        },
+        Some("part2") => BinaryBoardingArgs {
+            file: "day5/input.txt".to_string(),
+            strategy: BoardingIdStategy::MissingFromList,
         },
         _ => BinaryBoardingArgs {
             file: value_t_or_exit!(arguments.value_of("file"), String),
+            strategy: value_t_or_exit!(arguments.value_of("strategy"), BoardingIdStategy),
         },
     };
 
@@ -70,15 +103,35 @@ fn run(arguments: &ArgMatches) -> Result<(), Error> {
 fn process_boarding_passes(binary_boarding_arguments: &BinaryBoardingArgs) -> Result<usize, Error> {
     file_to_lines(&binary_boarding_arguments.file)
         .and_then(|lines| parse_lines(lines, parse_boarding_pass_line))
-        .map(|boarding_passes| {
-            boarding_passes.into_iter().fold(0, |max, value| {
-                if max > value.seat_id() {
-                    max
-                } else {
-                    value.seat_id()
-                }
-            })
+        .map(|boarding_passes| match binary_boarding_arguments.strategy {
+            BoardingIdStategy::HighestInList => find_highest_boarding_id(boarding_passes),
+            BoardingIdStategy::MissingFromList => find_missing_boarding_id(boarding_passes),
         })
+}
+
+fn find_highest_boarding_id(boarding_passes: Vec<BoardingPass>) -> usize {
+    boarding_passes.into_iter().fold(0, |max, value| {
+        if max > value.seat_id() {
+            max
+        } else {
+            value.seat_id()
+        }
+    })
+}
+
+fn find_missing_boarding_id(boarding_passes: Vec<BoardingPass>) -> usize {
+    let mut boarding_ids: Vec<usize> = boarding_passes
+        .into_iter()
+        .map(|boarding_pass| boarding_pass.seat_id())
+        .collect();
+
+    boarding_ids.sort();
+    boarding_ids
+        .windows(2)
+        .map(|window| (window[0], window[1]))
+        .find(|(low, high)| (low + 2) == *high)
+        .map(|(low, _)| low + 1)
+        .unwrap_or(0)
 }
 
 fn parse_boarding_pass_line(line: &String) -> Result<BoardingPass, Error> {
