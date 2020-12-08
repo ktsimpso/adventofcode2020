@@ -1,5 +1,6 @@
 #![feature(const_fn_fn_ptr_basics)]
 
+mod binary_boarding;
 mod lib;
 mod passport_processing;
 mod password_philosophy;
@@ -18,6 +19,7 @@ const COMMANDS: &'static [Command] = &[
     password_philosophy::PASSWORD_PHILOSOPHY,
     report_repair::REPORT_REPAIR,
     passport_processing::PASSPORT_PROCESSING,
+    binary_boarding::BINARY_BOARDING,
 ];
 
 fn main() -> Result<(), Error> {
