@@ -1,6 +1,6 @@
-use crate::lib::{file_to_string, parse_lines_borrowed, parse_usize, Command};
+use crate::lib::{default_sub_commnad, file_to_string, parse_lines_borrowed, parse_usize, Command};
 use anyhow::Error;
-use clap::{value_t_or_exit, App, AppSettings, Arg, ArgMatches, SubCommand};
+use clap::{value_t_or_exit, App, Arg, ArgMatches, SubCommand};
 use nom::{
     branch::alt,
     bytes::complete::{is_not, tag, take, take_until},
@@ -76,41 +76,28 @@ impl Passport {
 }
 
 fn sub_command() -> App<'static, 'static> {
-    SubCommand::with_name(PASSPORT_PROCESSING.name())
-        .about(
-            "Takes a passport file and validates each passport within. Returns the number of valid \
-            passports in the input.",
-        )
-        .version("1.0.0")
-        .setting(AppSettings::SubcommandsNegateReqs)
-        .setting(AppSettings::ArgsNegateSubcommands)
-        .arg(
-            Arg::with_name("file")
-                .short("f")
-                .help(
-                    "Path to the input file. Input should be passports seperated by a blank line. \
-                    Passport fields should be key:value and seperated by a space or a newline.",
-                )
-                .takes_value(true)
-                .required(true),
-        )
-        .arg(
-            Arg::with_name("verify-fields")
-            .short("v")
-            .help(
-                "When passed, verifies the field value of the passport instead of just presence."
-            )
-        )
-        .subcommand(
-            SubCommand::with_name("part1")
-                .about("Validates the default input but does not validate field values")
-                .version("1.0.0"),
-        )
-        .subcommand(
-            SubCommand::with_name("part2")
-                .about("Validates the default input and validates field values")
-                .version("1.0.0"),
-        )
+    default_sub_commnad(
+        &PASSPORT_PROCESSING,
+        "Takes a passport file and validates each passport within. Returns the number of valid \
+    passports in the input.",
+        "Path to the input file. Input should be passports seperated by a blank line. \
+    Passport fields should be key:value and seperated by a space or a newline.",
+    )
+    .arg(
+        Arg::with_name("verify-fields").short("v").help(
+            "When passed, verifies the field value of the passport instead of just presence.",
+        ),
+    )
+    .subcommand(
+        SubCommand::with_name("part1")
+            .about("Validates the default input but does not validate field values")
+            .version("1.0.0"),
+    )
+    .subcommand(
+        SubCommand::with_name("part2")
+            .about("Validates the default input and validates field values")
+            .version("1.0.0"),
+    )
 }
 
 fn run(arguments: &ArgMatches) -> Result<(), Error> {

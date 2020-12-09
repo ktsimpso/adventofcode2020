@@ -1,7 +1,7 @@
 #![feature(const_fn_fn_ptr_basics)]
 
 use anyhow::Error;
-use clap::{App, ArgMatches};
+use clap::{App, AppSettings, Arg, ArgMatches, SubCommand};
 use nom::{character::complete::digit1, combinator::map_res, IResult};
 use std::fs::File;
 use std::io::{BufRead, BufReader};
@@ -36,6 +36,25 @@ impl Command<'_> {
     pub fn run(&self, arguments: &ArgMatches) -> Result<(), Error> {
         (self.run)(arguments)
     }
+}
+
+pub fn default_sub_commnad(
+    command: &Command,
+    about: &'static str,
+    file_help: &'static str,
+) -> App<'static, 'static> {
+    SubCommand::with_name(command.name())
+        .about(about)
+        .version("1.0.0")
+        .setting(AppSettings::SubcommandsNegateReqs)
+        .setting(AppSettings::ArgsNegateSubcommands)
+        .arg(
+            Arg::with_name("file")
+                .short("f")
+                .help(file_help)
+                .takes_value(true)
+                .required(true),
+        )
 }
 
 pub fn file_to_lines(file_name: &String) -> Result<Vec<String>, Error> {

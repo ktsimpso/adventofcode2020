@@ -1,6 +1,6 @@
-use crate::lib::{file_to_lines, parse_lines, parse_usize, Command};
+use crate::lib::{default_sub_commnad, file_to_lines, parse_lines, parse_usize, Command};
 use anyhow::Error;
-use clap::{value_t_or_exit, App, AppSettings, Arg, ArgMatches, SubCommand};
+use clap::{value_t_or_exit, App, Arg, ArgMatches, SubCommand};
 use nom::{
     bytes::complete::{tag, take, take_while1},
     character::complete,
@@ -34,21 +34,9 @@ enum PasswordPolicy {
 }
 
 fn sub_command() -> App<'static, 'static> {
-    SubCommand::with_name(PASSWORD_PHILOSOPHY.name())
-        .about(
-            "Takes a list of password key/password pairs and returns the number of valid passwords.",
-        )
-        .version("1.0.0")
-        .setting(AppSettings::SubcommandsNegateReqs)
-        .setting(AppSettings::ArgsNegateSubcommands)
-        .arg(
-            Arg::with_name("file")
-                .short("f")
-                .help("Path to the input file. Input should be newline delimited and each line \
-                should have the form: {unsigned int}-{unsigned int} {character}: {password}")
-                .takes_value(true)
-                .required(true),
-        )
+    default_sub_commnad(&PASSWORD_PHILOSOPHY, "Takes a list of password key/password pairs and returns the number of valid passwords.",
+    "Path to the input file. Input should be newline delimited and each line \
+    should have the form: {unsigned int}-{unsigned int} {character}: {password}")
         .arg(
             Arg::with_name("policy")
                 .short("p")

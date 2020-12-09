@@ -1,6 +1,6 @@
-use crate::lib::{file_to_lines, parse_lines, Command};
+use crate::lib::{default_sub_commnad, file_to_lines, parse_lines, Command};
 use anyhow::Error;
-use clap::{value_t_or_exit, App, AppSettings, Arg, ArgMatches, SubCommand};
+use clap::{value_t_or_exit, App, Arg, ArgMatches, SubCommand};
 use simple_error::SimpleError;
 use std::collections::HashMap;
 
@@ -13,51 +13,42 @@ struct ReportRepairArgs {
 }
 
 fn sub_command() -> App<'static, 'static> {
-    SubCommand::with_name(REPORT_REPAIR.name())
-        .about(
-            "Looks through the input for n numbers that sum to target. \
+    default_sub_commnad(
+        &REPORT_REPAIR,
+        "Looks through the input for n numbers that sum to target. \
+    Then multiplies the result and produces the output.",
+        "Path to the input file. Input should be newline delimited integers.",
+    )
+    .arg(
+        Arg::with_name("target")
+            .short("t")
+            .help("Target sum to find.")
+            .takes_value(true)
+            .required(true),
+    )
+    .arg(
+        Arg::with_name("number")
+            .short("n")
+            .help("Number of items that must be used in the sum")
+            .takes_value(true)
+            .required(true),
+    )
+    .subcommand(
+        SubCommand::with_name("part1")
+            .about(
+                "Searches the default input for two values that sum to 2020. \
 Then multiplies the result and produces the output.",
-        )
-        .version("1.0.0")
-        .setting(AppSettings::SubcommandsNegateReqs)
-        .setting(AppSettings::ArgsNegateSubcommands)
-        .arg(
-            Arg::with_name("file")
-                .short("f")
-                .help("Path to the input file. Input should be newline delimited integers.")
-                .takes_value(true)
-                .required(true),
-        )
-        .arg(
-            Arg::with_name("target")
-                .short("t")
-                .help("Target sum to find.")
-                .takes_value(true)
-                .required(true),
-        )
-        .arg(
-            Arg::with_name("number")
-                .short("n")
-                .help("Number of items that must be used in the sum")
-                .takes_value(true)
-                .required(true),
-        )
-        .subcommand(
-            SubCommand::with_name("part1")
-                .about(
-                    "Searches the default input for two values that sum to 2020. \
+            )
+            .version("1.0.0"),
+    )
+    .subcommand(
+        SubCommand::with_name("part2")
+            .about(
+                "Searches the default input for three values that sum to 2020. \
 Then multiplies the result and produces the output.",
-                )
-                .version("1.0.0"),
-        )
-        .subcommand(
-            SubCommand::with_name("part2")
-                .about(
-                    "Searches the default input for three values that sum to 2020. \
-Then multiplies the result and produces the output.",
-                )
-                .version("1.0.0"),
-        )
+            )
+            .version("1.0.0"),
+    )
 }
 
 fn run(arguments: &ArgMatches) -> Result<(), Error> {
