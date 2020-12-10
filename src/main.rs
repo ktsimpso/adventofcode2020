@@ -3,6 +3,7 @@
 
 mod binary_boarding;
 mod custom_customs;
+mod handheld_halting;
 mod handy_haversacks;
 mod lib;
 mod passport_processing;
@@ -25,6 +26,7 @@ const COMMANDS: &'static [Command] = &[
     binary_boarding::BINARY_BOARDING,
     custom_customs::CUSTOM_CUSTOMS,
     handy_haversacks::HANDY_HAVERSACKS,
+    handheld_halting::HANDHELD_HALTING,
 ];
 
 fn main() -> Result<(), Error> {
