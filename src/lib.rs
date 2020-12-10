@@ -38,7 +38,7 @@ impl Command<'_> {
     }
 }
 
-pub fn default_sub_commnad(
+pub fn default_sub_command(
     command: &Command,
     about: &'static str,
     file_help: &'static str,

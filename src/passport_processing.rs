@@ -1,4 +1,4 @@
-use crate::lib::{default_sub_commnad, file_to_string, parse_lines_borrowed, parse_usize, Command};
+use crate::lib::{default_sub_command, file_to_string, parse_lines_borrowed, parse_usize, Command};
 use anyhow::Error;
 use clap::{value_t_or_exit, App, Arg, ArgMatches, SubCommand};
 use nom::{
@@ -76,7 +76,7 @@ impl Passport {
 }
 
 fn sub_command() -> App<'static, 'static> {
-    default_sub_commnad(
+    default_sub_command(
         &PASSPORT_PROCESSING,
         "Takes a passport file and validates each passport within. Returns the number of valid \
     passports in the input.",

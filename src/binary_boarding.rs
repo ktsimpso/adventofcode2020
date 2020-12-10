@@ -1,4 +1,4 @@
-use crate::lib::{default_sub_commnad, file_to_lines, parse_lines, Command};
+use crate::lib::{default_sub_command, file_to_lines, parse_lines, Command};
 use anyhow::Error;
 use clap::{value_t_or_exit, App, Arg, ArgMatches, SubCommand};
 use nom::{
@@ -41,7 +41,7 @@ impl BoardingPass {
 }
 
 fn sub_command() -> App<'static, 'static> {
-    default_sub_commnad(&BINARY_BOARDING, "Takes a file with boarding passes and finds the highest seat id", "Path to the input file. Input should be newline separated boarding passes.")
+    default_sub_command(&BINARY_BOARDING, "Takes a file with boarding passes and finds the highest seat id", "Path to the input file. Input should be newline separated boarding passes.")
         .arg(
             Arg::with_name("strategy")
                 .short("s")

@@ -1,4 +1,4 @@
-use crate::lib::{default_sub_commnad, file_to_lines, parse_lines, parse_usize, Command};
+use crate::lib::{default_sub_command, file_to_lines, parse_lines, parse_usize, Command};
 use anyhow::Error;
 use clap::{value_t_or_exit, App, Arg, ArgMatches, SubCommand};
 use nom::{
@@ -34,7 +34,7 @@ enum PasswordPolicy {
 }
 
 fn sub_command() -> App<'static, 'static> {
-    default_sub_commnad(&PASSWORD_PHILOSOPHY, "Takes a list of password key/password pairs and returns the number of valid passwords.",
+    default_sub_command(&PASSWORD_PHILOSOPHY, "Takes a list of password key/password pairs and returns the number of valid passwords.",
     "Path to the input file. Input should be newline delimited and each line \
     should have the form: {unsigned int}-{unsigned int} {character}: {password}")
         .arg(

@@ -1,4 +1,4 @@
-use crate::lib::{default_sub_commnad, file_to_lines, parse_lines, Command};
+use crate::lib::{default_sub_command, file_to_lines, parse_lines, Command};
 use anyhow::Error;
 use clap::{value_t_or_exit, App, Arg, ArgMatches, SubCommand};
 use simple_error::SimpleError;
@@ -13,7 +13,7 @@ struct ReportRepairArgs {
 }
 
 fn sub_command() -> App<'static, 'static> {
-    default_sub_commnad(
+    default_sub_command(
         &REPORT_REPAIR,
         "Looks through the input for n numbers that sum to target. \
     Then multiplies the result and produces the output.",

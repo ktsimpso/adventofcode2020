@@ -1,4 +1,4 @@
-use crate::lib::{default_sub_commnad, file_to_lines, parse_lines, parse_usize, Command};
+use crate::lib::{default_sub_command, file_to_lines, parse_lines, parse_usize, Command};
 use anyhow::Error;
 use clap::{value_t_or_exit, values_t_or_exit, App, Arg, ArgMatches, SubCommand};
 use nom::{
@@ -43,7 +43,7 @@ enum Terrain {
 }
 
 fn sub_command() -> App<'static, 'static> {
-    default_sub_commnad(&TOBOGGAN_TRAJECTORY, "Takes a toboggan hill and a slope an returns the product of the number of trees \
+    default_sub_command(&TOBOGGAN_TRAJECTORY, "Takes a toboggan hill and a slope an returns the product of the number of trees \
     that the toboggan hit on each slope", "Path to the input file. Input should be a toboggan hill with . denoting\
     an empty space and # denoting a tree.")
         .arg(Arg::with_name("slope")

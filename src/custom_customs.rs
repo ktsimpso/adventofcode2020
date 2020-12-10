@@ -1,8 +1,8 @@
 #![feature(iterator_fold_self)]
 
-use crate::lib::{file_to_string, Command};
+use crate::lib::{default_sub_command, file_to_string, Command};
 use anyhow::Error;
-use clap::{value_t_or_exit, App, AppSettings, Arg, ArgMatches, SubCommand};
+use clap::{value_t_or_exit, App, Arg, ArgMatches, SubCommand};
 use nom::{
     branch::alt,
     bytes::complete::{tag, take, take_till1, take_until},
@@ -30,19 +30,8 @@ enum CustomsCountStrategy {
 }
 
 fn sub_command() -> App<'static, 'static> {
-    SubCommand::with_name(CUSTOM_CUSTOMS.name())
-        .about("Takes a file with customs questions groups and cacluates the sum of unique per group questions")
-        .version("1.0.0")
-        .setting(AppSettings::SubcommandsNegateReqs)
-        .setting(AppSettings::ArgsNegateSubcommands)
-        .arg(
-            Arg::with_name("file")
-                .short("f")
-                .help("Path to the input file. Groups are separated by a blank line, people within a group are \
-                separated by a newline.")
-                .takes_value(true)
-                .required(true),
-        )
+    default_sub_command(&CUSTOM_CUSTOMS, "Takes a file with customs questions groups and cacluates the sum of unique per group questions", "Path to the input file. Groups are separated by a blank line, people within a group are \
+    separated by a newline.")
         .arg(
             Arg::with_name("strategy")
                 .short("s")
