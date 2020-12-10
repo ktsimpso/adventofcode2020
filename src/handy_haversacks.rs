@@ -12,6 +12,8 @@ use nom::{
 };
 use simple_error::SimpleError;
 use std::collections::{HashMap, HashSet, VecDeque};
+use strum::VariantNames;
+use strum_macros::{EnumString, EnumVariantNames};
 
 pub const HANDY_HAVERSACKS: Command = Command::new(sub_command, "handy-haversacks", run);
 
@@ -19,6 +21,14 @@ pub const HANDY_HAVERSACKS: Command = Command::new(sub_command, "handy-haversack
 struct HandyHaversackArgs {
     file: String,
     sack_name: String,
+    count_strategy: SackCountStrategy,
+}
+
+#[derive(Debug, EnumString, EnumVariantNames)]
+#[strum(serialize_all = "kebab_case")]
+enum SackCountStrategy {
+    CountBagsThatContainTarget,
+    CountBagsInTarget,
 }
 
 #[derive(Debug)]
@@ -40,9 +50,24 @@ fn sub_command() -> App<'static, 'static> {
             .takes_value(true)
             .required(true),
     )
+    .arg(
+        Arg::with_name("count_strategy")
+            .short("c")
+            .help("What to count for the sack. The strategies are as follows:\n\n\
+            count-bags-that-contain-target: Counts the number of bag that eventually contain the target bag\n\n\
+            count-bags-in-target: Counts the total number of bags inside the target bag.\n")
+            .takes_value(true)
+            .possible_values(&SackCountStrategy::VARIANTS)
+            .required(true),
+    )
     .subcommand(
         SubCommand::with_name("part1")
-            .about("Finds the number of unique starting bags which contain at least 1 gold bag")
+            .about("Finds the number of unique starting bags which contain at least 1 shiny gold bag")
+            .version("1.0.0"),
+    )
+    .subcommand(
+        SubCommand::with_name("part2")
+            .about("Finds the number of bags inside a shiny gold bag")
             .version("1.0.0"),
     )
 }
@@ -52,10 +77,20 @@ fn run(arguments: &ArgMatches) -> Result<(), Error> {
         Some("part1") => HandyHaversackArgs {
             file: "day7/input.txt".to_string(),
             sack_name: "shiny gold".to_string(),
+            count_strategy: SackCountStrategy::CountBagsThatContainTarget,
+        },
+        Some("part2") => HandyHaversackArgs {
+            file: "day7/input.txt".to_string(),
+            sack_name: "shiny gold".to_string(),
+            count_strategy: SackCountStrategy::CountBagsInTarget,
         },
         _ => HandyHaversackArgs {
             file: value_t_or_exit!(arguments.value_of("file"), String),
             sack_name: value_t_or_exit!(arguments.value_of("sack"), String),
+            count_strategy: value_t_or_exit!(
+                arguments.value_of("count_strategy"),
+                SackCountStrategy
+            ),
         },
     };
 
@@ -69,7 +104,42 @@ fn run(arguments: &ArgMatches) -> Result<(), Error> {
 fn process_sacks(handy_haversack_arguments: &HandyHaversackArgs) -> Result<usize, Error> {
     file_to_lines(&handy_haversack_arguments.file)
         .and_then(|lines| parse_lines(lines, parse_sack_rules))
-        .map(|rules| find_bags_that_contain(&handy_haversack_arguments.sack_name, rules))
+        .map(|rules| match handy_haversack_arguments.count_strategy {
+            SackCountStrategy::CountBagsThatContainTarget => {
+                find_bags_that_contain(&handy_haversack_arguments.sack_name, rules)
+            }
+            SackCountStrategy::CountBagsInTarget => {
+                find_number_of_bags_in_target(&handy_haversack_arguments.sack_name, rules)
+            }
+        })
+}
+
+fn find_number_of_bags_in_target(sack_name: &String, rules: Vec<SackRule>) -> usize {
+    let bag_lookup: HashMap<String, HashMap<String, usize>> = rules
+        .into_iter()
+        .map(|rule| (rule.sack_name, rule.contains))
+        .collect();
+
+    find_bags_in_target(sack_name, &bag_lookup, &mut HashMap::new())
+}
+
+fn find_bags_in_target(
+    sack_name: &String,
+    bag_lookup: &HashMap<String, HashMap<String, usize>>,
+    cache: &mut HashMap<String, usize>,
+) -> usize {
+    match cache.get(sack_name) {
+        Some(value) => *value,
+        None => {
+            let contained_bags = bag_lookup.get(sack_name).unwrap();
+            let result = contained_bags
+                .iter()
+                .map(|(name, value)| find_bags_in_target(&name, bag_lookup, cache) * value + value)
+                .fold(0, |acc, value| acc + value);
+            cache.insert(sack_name.clone(), result);
+            result
+        }
+    }
 }
 
 fn find_bags_that_contain(sack_name: &String, rules: Vec<SackRule>) -> usize {
