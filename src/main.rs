@@ -1,6 +1,7 @@
 #![feature(const_fn_fn_ptr_basics)]
 #![feature(iterator_fold_self)]
 
+mod adapter_array;
 mod binary_boarding;
 mod custom_customs;
 mod encoding_error;
@@ -29,6 +30,7 @@ const COMMANDS: &'static [Command] = &[
     handy_haversacks::HANDY_HAVERSACKS,
     handheld_halting::HANDHELD_HALTING,
     encoding_error::ENCODING_ERROR,
+    adapter_array::ADAPTER_ARRAY,
 ];
 
 fn main() -> Result<(), Error> {

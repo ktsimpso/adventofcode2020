@@ -36,16 +36,15 @@ fn sub_command() -> App<'static, 'static> {
     .subcommand(
         SubCommand::with_name("part1")
             .about(
-                "Finds the value of the accumulator when a loop is detected, or when \
-            the program terminates with default input.",
+                "Finds the value that does not fit then encoding using dfeault input.",
             )
             .version("1.0.0"),
     )
     .subcommand(
         SubCommand::with_name("part2")
             .about(
-                "Finds the value of the accumulator when a loop is detected, or when \
-            the program terminates with default input. Then finds the exploit value.",
+                "Finds the value that does not fit then encoding using dfeault input. \
+                Then finds the exploit value.",
             )
             .version("1.0.0"),
     )
