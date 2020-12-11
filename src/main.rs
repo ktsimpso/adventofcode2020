@@ -3,6 +3,7 @@
 
 mod binary_boarding;
 mod custom_customs;
+mod encoding_error;
 mod handheld_halting;
 mod handy_haversacks;
 mod lib;
@@ -27,6 +28,7 @@ const COMMANDS: &'static [Command] = &[
     custom_customs::CUSTOM_CUSTOMS,
     handy_haversacks::HANDY_HAVERSACKS,
     handheld_halting::HANDHELD_HALTING,
+    encoding_error::ENCODING_ERROR,
 ];
 
 fn main() -> Result<(), Error> {

@@ -1,10 +1,10 @@
-use crate::lib::{default_sub_command, file_to_lines, parse_lines, Command};
+use crate::lib::{default_sub_command, file_to_lines, parse_isize, parse_lines, Command};
 use anyhow::Error;
 use clap::{value_t_or_exit, App, Arg, ArgMatches, SubCommand};
 use nom::{
     bytes::complete::tag,
     character::complete,
-    combinator::{map, map_res, rest},
+    combinator::{map, map_res},
     sequence::separated_pair,
 };
 use simple_error::SimpleError;
@@ -85,7 +85,7 @@ fn process_program(handheld_halting_arguments: &HandHeldHaltingArgs) -> Result<i
     file_to_lines(&handheld_halting_arguments.file)
         .and_then(|lines| parse_lines(lines, parse_program_line))
         .map(|program| {
-            let result = find_acc_when_infinite(&program);
+            let result = compute_acc(&program);
 
             if !handheld_halting_arguments.modify {
                 match result {
@@ -105,7 +105,7 @@ fn process_program(handheld_halting_arguments: &HandHeldHaltingArgs) -> Result<i
                         ProgramLine::Jmp(value) => new_program[index] = ProgramLine::Nop(value),
                         ProgramLine::Nop(value) => new_program[index] = ProgramLine::Jmp(value),
                     }
-                    match find_acc_when_infinite(&new_program) {
+                    match compute_acc(&new_program) {
                         Ok(value) => return value,
                         Err(_) => (),
                     }
@@ -116,7 +116,7 @@ fn process_program(handheld_halting_arguments: &HandHeldHaltingArgs) -> Result<i
         })
 }
 
-fn find_acc_when_infinite(program: &Vec<ProgramLine>) -> Result<isize, isize> {
+fn compute_acc(program: &Vec<ProgramLine>) -> Result<isize, isize> {
     let mut acc_value = 0;
     let mut visited = HashSet::new();
     let mut program_counter = 0isize;
@@ -153,7 +153,7 @@ fn parse_program_line(line: &String) -> Result<ProgramLine, Error> {
         separated_pair(
             map_res(complete::alpha1, ProgramLine::from_str),
             tag(" "),
-            map_res(rest, |value| isize::from_str_radix(value, 10)),
+            parse_isize,
         ),
         |(instruction, value)| match instruction {
             ProgramLine::Acc(_) => ProgramLine::Acc(value),

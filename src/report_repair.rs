@@ -1,8 +1,6 @@
-use crate::lib::{default_sub_command, file_to_lines, parse_lines, Command};
+use crate::lib::{default_sub_command, file_to_lines, parse_lines, Command, SumChecker};
 use anyhow::Error;
 use clap::{value_t_or_exit, App, Arg, ArgMatches, SubCommand};
-use simple_error::SimpleError;
-use std::collections::HashMap;
 
 pub const REPORT_REPAIR: Command = Command::new(sub_command, "report-repair", run);
 
@@ -84,62 +82,7 @@ fn run(arguments: &ArgMatches) -> Result<(), Error> {
 }
 
 fn find_muliple_of_sum_of_n(target: &isize, input: &Vec<isize>, n: usize) -> Result<isize, Error> {
-    find_sum_of_n(target, input, n)
+    SumChecker::with_vec(input)
+        .find_sum_of_n(target, n)
         .map(|result| result.into_iter().fold(1, |acc, number| acc * number))
-}
-
-fn find_sum_of_n(target: &isize, input: &Vec<isize>, n: usize) -> Result<Vec<isize>, Error> {
-    let numbers = build_numbers_map(input);
-
-    if n == 2 {
-        find_sum(target, input, numbers)
-    } else {
-        input
-            .into_iter()
-            .find_map(|value| {
-                let new_target = target - value;
-                find_sum_of_n(&new_target, input, n - 1)
-                    .ok()
-                    .filter(|found_values| {
-                        *numbers.get(value).unwrap_or(&0)
-                            > found_values
-                                .into_iter()
-                                .filter(|found_value| *found_value == value)
-                                .count()
-                    })
-                    .map(|mut found_values| {
-                        found_values.push(*value);
-                        found_values
-                    })
-            })
-            .ok_or(SimpleError::new(format!("No values found that sum to {}", target)).into())
-    }
-}
-
-fn find_sum(
-    target: &isize,
-    input: &Vec<isize>,
-    numbers: HashMap<&isize, usize>,
-) -> Result<Vec<isize>, Error> {
-    input
-        .into_iter()
-        .find_map(|value| {
-            numbers
-                .get_key_value(&(target - value))
-                .filter(|(key, count)| key != &&value || count > &&1)
-                .map(|(key, _count)| vec![**key, *value])
-        })
-        .ok_or(SimpleError::new(format!("No values found that sum to {}", target)).into())
-}
-
-fn build_numbers_map(input: &Vec<isize>) -> HashMap<&isize, usize> {
-    let mut numbers = HashMap::new();
-
-    input.into_iter().for_each(|number| {
-        numbers.insert(
-            number,
-            numbers.get(&number).map(|count| count + 1).unwrap_or(1),
-        );
-    });
-    numbers
 }
