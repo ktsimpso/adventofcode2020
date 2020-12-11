@@ -1,5 +1,3 @@
-#![feature(iterator_fold_self)]
-
 use crate::lib::{default_sub_command, file_to_string, Command};
 use anyhow::Error;
 use clap::{value_t_or_exit, App, Arg, ArgMatches, SubCommand};
