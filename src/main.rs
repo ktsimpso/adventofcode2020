@@ -11,6 +11,7 @@ mod lib;
 mod passport_processing;
 mod password_philosophy;
 mod report_repair;
+mod seating_system;
 mod toboggan_trajectory;
 
 use anyhow::Error;
@@ -31,6 +32,7 @@ const COMMANDS: &'static [Command] = &[
     handheld_halting::HANDHELD_HALTING,
     encoding_error::ENCODING_ERROR,
     adapter_array::ADAPTER_ARRAY,
+    seating_system::SEATING_SYSTEM,
 ];
 
 fn main() -> Result<(), Error> {

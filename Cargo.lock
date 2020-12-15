@@ -2,7 +2,7 @@
 # It is not intended for manual editing.
 [[package]]
 name = "adventofcode2020"
-version = "0.10.1"
+version = "0.11.0"
 dependencies = [
  "anyhow",
  "clap",
