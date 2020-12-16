@@ -10,6 +10,7 @@ mod handy_haversacks;
 mod lib;
 mod passport_processing;
 mod password_philosophy;
+mod rain_risk;
 mod report_repair;
 mod seating_system;
 mod toboggan_trajectory;
@@ -33,6 +34,7 @@ const COMMANDS: &'static [Command] = &[
     encoding_error::ENCODING_ERROR,
     adapter_array::ADAPTER_ARRAY,
     seating_system::SEATING_SYSTEM,
+    rain_risk::RAIN_RISK,
 ];
 
 fn main() -> Result<(), Error> {

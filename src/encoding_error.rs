@@ -17,7 +17,7 @@ struct EncodingErrorArgs {
 fn sub_command() -> App<'static, 'static> {
     default_sub_command(
         &ENCODING_ERROR,
-        "Takes a file with one number on each line and a preamble find the number that does not fit the 
+        "Takes a file with one number on each line and a preamble find the number that does not fit the \
         encoding.",
         "Path to the input file. Each line contains one integer.",
     )
