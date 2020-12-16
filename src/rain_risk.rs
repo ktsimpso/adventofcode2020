@@ -55,14 +55,14 @@ fn sub_command() -> App<'static, 'static> {
     .subcommand(
         SubCommand::with_name("part1")
             .about(
-                "Finds the Manhattan distance using relative direction-strategy and the default intput.",
+                "Finds the Manhattan distance using relative direction-strategy and the default input.",
             )
             .version("1.0.0"),
     )
     .subcommand(
         SubCommand::with_name("part2")
             .about(
-                "Finds the Manhattan distance using waypoint direction-strategy and the default intput.",
+                "Finds the Manhattan distance using waypoint direction-strategy and the default input.",
             )
             .version("1.0.0"),
     )

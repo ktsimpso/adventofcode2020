@@ -13,6 +13,7 @@ mod password_philosophy;
 mod rain_risk;
 mod report_repair;
 mod seating_system;
+mod shuttle_search;
 mod toboggan_trajectory;
 
 use anyhow::Error;
@@ -35,6 +36,7 @@ const COMMANDS: &'static [Command] = &[
     adapter_array::ADAPTER_ARRAY,
     seating_system::SEATING_SYSTEM,
     rain_risk::RAIN_RISK,
+    shuttle_search::SHUTTLE_SEARCH,
 ];
 
 fn main() -> Result<(), Error> {
